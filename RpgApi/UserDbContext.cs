@@ -28,6 +28,18 @@ namespace Rpg
                 Guid = inGuid
             };
             Add(newPlayer);
+
+            // TODO: 필수 포인트 생성
+            for (int iNum = 1; iNum < 3; ++iNum)
+            {
+                var newPoint = new Point()
+                {
+                    Player = newPlayer,
+                    Num = iNum,
+                };
+                Add(newPoint);
+            }
+
             await SaveChangesAsync();
             return newPlayer;
         }
@@ -48,6 +60,11 @@ namespace Rpg
             Add(newPoint);
             await SaveChangesAsync();
             return newPoint;
+        }
+
+        public async Task<List<Point>> GetPointListAsync(Player inPlayer)
+        {
+            return PointSet.Where(each => each.Player.Id == inPlayer.Id).ToList();
         }
 
         public DbSet<Player> PlayerSet { get; set; }
