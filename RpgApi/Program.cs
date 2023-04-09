@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -5,9 +6,9 @@ using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rpg;
+using Rpg.Services;
 using System.Text;
 using System.Diagnostics;
-using Rpg.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
@@ -66,6 +67,8 @@ builder.Services.AddSingleton<AuthService>(provider =>
 });
 
 builder.Services.AddGrpc();
+builder.Services.AddGrpcReflection();
+builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 var app = builder.Build();
 app.Logger.LogDebug("app_started");
@@ -75,11 +78,12 @@ if (app.Environment.IsDevelopment())
     app.Logger.LogInformation("swagger_started");
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.MapGrpcReflectionService();
 }
 
 app.UseAuthorization();
 app.UseAuthentication();
-app.MapGrpcService<Rpg.Services.MathGrpcService>();
+app.MapGrpcService<GameRpcService>();
 
 app.MapGet("/", () => "Hello World!");
 
@@ -90,11 +94,11 @@ app.MapGet("/game/player", GetPlayer);
 
 app.Run();
 
-async Task<IResult> PostGame(UserDbContext dbCtx, AuthService authSvc)
+async Task<IResult> PostGame(string guid, UserDbContext dbCtx, AuthService authSvc)
 {
-    var player = await dbCtx.MakePlayer();
-    var tokenStr = authSvc.CreateToken(player.Id);
-    return Results.Text(tokenStr);
+    var player = await dbCtx.TouchPlayerAsync(guid);
+    var token = authSvc.CreateToken(player.Id);
+    return Results.Text(token);
 }
 
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "PLAYER")]

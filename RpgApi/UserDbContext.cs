@@ -10,14 +10,25 @@ namespace Rpg
         }
 
 
-        public async Task<Player?> FindPlayer(int id)
+        public async Task<Player?> FindPlayerAsync(int id)
         {
             return await PlayerSet.FindAsync(id);
         }
 
-        public async Task<Player> MakePlayer()
+        public async Task<Player> TouchPlayerAsync(string inGuid)
         {
-            Player newPlayer = new Player();
+            var oldPlayer = PlayerSet.Where(player => player.Guid == inGuid).FirstOrDefault();
+            if (oldPlayer != null)
+            {
+                return oldPlayer;
+            }
+
+            Player newPlayer = new Player()
+            {
+                Guid = inGuid,
+                Name = "",
+                FreeCash = 100,
+            };
             Add(newPlayer);
             await SaveChangesAsync();
             return newPlayer;

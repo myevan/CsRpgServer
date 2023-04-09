@@ -1,0 +1,29 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Rpg.Grpc";
+
+package example;
+
+service Game {
+	rpc EnterWorld(WorldRequest) returns (WorldResponse);
+	rpc ChangePlayerName(NameRequest) returns (PlayerResponse);
+}
+
+message PlayerResponse {
+	int64 realCash = 1;
+	int64 freeCash = 2;
+	string name = 3;
+}
+
+message WorldRequest {
+	string guid = 1;
+}
+
+message WorldResponse {
+	string token = 1;
+	PlayerResponse player = 2;
+}
+
+message NameRequest {
+	string name = 1;
+}
