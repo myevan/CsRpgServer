@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Rpg.Models;
 
 namespace Rpg
@@ -9,6 +8,7 @@ namespace Rpg
         public UserDbContext(DbContextOptions<UserDbContext> opts) : base(opts)
         {
         }
+
 
         public async Task<Player?> FindPlayer(int id)
         {

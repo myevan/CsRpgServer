@@ -3,3 +3,7 @@
         Default: Debug
         Microsoft.AspNetCore: Warning
 AllowedHosts: "*"
+Jwt:
+    Issuer: DEV_ISSUER
+    Audience:  DEV_AUDIENCE
+    Key: TODO_KEY_0123456789012345678901234567890123456789
