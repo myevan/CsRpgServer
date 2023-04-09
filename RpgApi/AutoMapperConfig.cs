@@ -9,6 +9,7 @@ namespace Rpg
         public AutoMapperConfig()
         {
             CreateMap<Player, PlayerResponse>().ReverseMap();
+            CreateMap<Point, PointResponse>().ReverseMap();
         }
     }
 }

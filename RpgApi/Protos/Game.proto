@@ -15,6 +15,12 @@ message PlayerResponse {
 	string name = 3;
 }
 
+message PointResponse {
+	int32 id = 1;
+	int32 num = 2;
+	int64 amount = 3;
+}
+
 message WorldRequest {
 	string guid = 1;
 }
@@ -22,6 +28,7 @@ message WorldRequest {
 message WorldResponse {
 	string token = 1;
 	PlayerResponse player = 2;
+	repeated PointResponse points = 3;
 }
 
 message NameRequest {

@@ -13,7 +13,7 @@ namespace Rpg.Models
 
         public required string Guid { get; set; }
 
-        public required string Name { get; set; }
+        public string Name { get; set; } = "";
 
         public int RealCash { get; set; } = 0;
         public int FreeCash { get; set; } = 0;

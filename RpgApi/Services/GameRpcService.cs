@@ -29,6 +29,8 @@ namespace Rpg.Services
                 Token = newToken,
                 Player = _mapper.Map<PlayerResponse>(reqPlayer),
             };
+            res.Points.Add(_mapper.Map<PointResponse>(await _dbCtx.TouchPointAsync(reqPlayer, 1)));
+            res.Points.Add(_mapper.Map<PointResponse>(await _dbCtx.TouchPointAsync(reqPlayer, 2)));
             return await Task.FromResult(res);
         }
 
