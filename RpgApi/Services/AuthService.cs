@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Rpg.Models;
 
-namespace Rpg
+namespace Rpg.Services
 {
     public class AuthService
     {
@@ -12,7 +12,7 @@ namespace Rpg
         {
             _issuer = issuer;
             _audience = audience;
-            _keyStr= keyStr;
+            _keyStr = keyStr;
         }
 
         public string CreateToken(int inPlayerId)

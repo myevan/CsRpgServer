@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Rpg;
 using System.Text;
 using System.Diagnostics;
+using Rpg.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
