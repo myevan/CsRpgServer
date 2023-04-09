@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 using Rpg;
 using System.Text;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
@@ -65,6 +64,8 @@ builder.Services.AddSingleton<AuthService>(provider =>
     return new AuthService(jwtIssuer, jwtAudience, jwtKeyStr);
 });
 
+builder.Services.AddGrpc();
+
 var app = builder.Build();
 app.Logger.LogDebug("app_started");
 
@@ -77,6 +78,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.UseAuthentication();
+app.MapGrpcService<Rpg.Services.MathGrpcService>();
 
 app.MapGet("/", () => "Hello World!");
 
