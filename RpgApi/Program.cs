@@ -9,6 +9,7 @@ using Rpg;
 using Rpg.Services;
 using System.Text;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
@@ -85,34 +86,17 @@ app.UseAuthorization();
 app.UseAuthentication();
 app.MapGrpcService<GameRpcService>();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", 
+    () => 
+        "Welcome to Rpg!");
 
-app.MapPost("/game", PostGame);
-app.MapGet("/game", GetGame);
+app.MapPost("/auth", 
+    (string guid, AuthService authSvc) => 
+        Results.Text(authSvc.CreateRoleToken("OPERATOR")));
 
-app.MapGet("/game/player", GetPlayer);
+app.MapGet("/world/player/{id}",
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "OPERATOR")]
+    (int id, UserDbContext dbCtx) =>
+        Results.Ok(dbCtx.PlayerSet.Find(id)));
 
 app.Run();
-
-async Task<IResult> PostGame(string guid, UserDbContext dbCtx, AuthService authSvc)
-{
-    var player = await dbCtx.TouchPlayerAsync(guid);
-    var token = authSvc.CreateToken(player.Id);
-    return Results.Text(token);
-}
-
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "PLAYER")]
-async Task<IResult> GetGame(HttpContext httpCtx, UserDbContext dbCtx, AuthService authSvc)
-{
-    var player = await authSvc.GetPlayer(httpCtx, dbCtx);
-    if (player == null) return Results.NotFound("PLAYER_NOT_FOUND");
-    return Results.Ok($"Hello, Player({player.Id})");
-}
-
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "PLAYER")]
-async Task<IResult> GetPlayer(HttpContext httpCtx, UserDbContext dbCtx, AuthService authSvc)
-{
-    var player = await authSvc.GetPlayer(httpCtx, dbCtx);
-    if (player == null) return Results.NotFound("PLAYER_NOT_FOUND");
-    return Results.Ok(player);
-}

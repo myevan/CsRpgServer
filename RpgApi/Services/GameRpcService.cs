@@ -23,7 +23,7 @@ namespace Rpg.Services
 
             var reqPlayer = VerifyModel(await _dbCtx.TouchPlayerAsync(req.Guid), "RPC_ERR_REQ_PLAYER");
             
-            var newToken = _authSvc.CreateToken(reqPlayer.Id);
+            var newToken = _authSvc.CreatePlayerToken(reqPlayer.Id);
             var res = new WorldResponse()
             {
                 Token = newToken,

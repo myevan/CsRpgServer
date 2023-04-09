@@ -15,14 +15,28 @@ namespace Rpg.Services
             _keyStr = keyStr;
         }
 
-        public string CreateToken(int inPlayerId)
+        public string CreatePlayerToken(int inPlayerId)
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Role, "PLAYER"),
                 new Claim(ClaimTypes.NameIdentifier, inPlayerId.ToString()),
+                new Claim(ClaimTypes.Role, "PLAYER"),
             };
 
+            return CreateToken(claims);
+        }
+        public string CreateRoleToken(string role)
+        {
+            var claims = new[]
+            {                
+                new Claim(ClaimTypes.Role, role),
+            };
+
+            return CreateToken(claims);
+        }
+
+        private string CreateToken(Claim[] claims)
+        {
             var token = new JwtSecurityToken
             (
                 issuer: _issuer,
@@ -45,7 +59,7 @@ namespace Rpg.Services
             var playerId = int.Parse(playerIdStr);
             return await dbCtx.PlayerSet.FindAsync(playerId);
         }
-
+        
         private readonly string _issuer;
         private readonly string _audience;
         private readonly string _keyStr;
