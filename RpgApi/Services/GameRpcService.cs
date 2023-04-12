@@ -11,7 +11,7 @@ namespace Rpg.Services
 {
     public class GameRpcService : Game.GameBase
     {
-        public GameRpcService(UserDbContext dbCtx, AuthService authSvc, IMapper mapper)
+        public GameRpcService(UserDbContext dbCtx, AuthTokenService authSvc, IMapper mapper)
         {
             _dbCtx = dbCtx;
             _authSvc = authSvc;
@@ -69,7 +69,7 @@ namespace Rpg.Services
         private static Player ValidPlayer(Player? obj) => ValidHelper.Object<Player>("PLAYER", obj);
 
         private UserDbContext _dbCtx;
-        private AuthService _authSvc;
+        private AuthTokenService _authSvc;
         private IMapper _mapper;
     }
 }

@@ -6,9 +6,9 @@ using Rpg.Models;
 
 namespace Rpg.Services
 {
-    public class AuthService
+    public class AuthTokenService
     {
-        public AuthService(string issuer, string audience, string keyStr)
+        public AuthTokenService(string issuer, string audience, string keyStr)
         {
             _issuer = issuer;
             _audience = audience;
