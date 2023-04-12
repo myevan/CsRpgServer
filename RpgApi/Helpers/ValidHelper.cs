@@ -6,7 +6,7 @@ namespace Rpg.Helpers
     {
         public static void Condition(bool isCond, StatusCode statusCode, string detail)
         {
-            if (isCond)
+            if (!isCond)
             {
                 throw new RpcException(new Status(statusCode, $"RPC_EXC_{detail}"));
             }
@@ -21,7 +21,7 @@ namespace Rpg.Helpers
         public static string StringLength(string name, string val, int maxLen)
         {
             String(name, val);
-            Condition(val.Length > maxLen, StatusCode.InvalidArgument, $"TOO_LONG_{name}");
+            Condition(val.Length <= maxLen, StatusCode.InvalidArgument, $"TOO_LONG_{name}");
             return val;
         }
 

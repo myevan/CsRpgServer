@@ -14,7 +14,7 @@ using Rpg.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
 
-var jwtCfg = ConfigHelper.Create<JwtConfig>(builder.Configuration, "Jwt:");
+var jwtCfg = ConfigHelper.Create<JwtAuthConfig>(builder.Configuration, "Jwt:");
 builder.Services.AddDbContext<UserDbContext>(opts => opts.UseInMemoryDatabase("UserDb"));
 
 builder.Services.AddEndpointsApiExplorer();
@@ -58,7 +58,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<AuthTokenService>(provider =>
 {
-    return new AuthTokenService(jwtCfg.Issuer, jwtCfg.Audience, jwtCfg.Key);
+    return new AuthTokenService(jwtCfg);
 });
 
 builder.Services.AddGrpc();

@@ -1,6 +1,6 @@
 ﻿namespace Rpg.Configs
 {
-    public class JwtConfig
+    public class JwtAuthConfig
     {
         public string Issuer { get; private set; } = string.Empty;
         public string Audience { get; private set; } = string.Empty;

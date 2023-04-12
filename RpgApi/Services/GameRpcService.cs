@@ -56,8 +56,9 @@ namespace Rpg.Services
         private async Task<Player> ValidGetPlayerAsync(ServerCallContext ctx)
         {
             var httpCtx = ctx.GetHttpContext();
-            var foundPlayer = await _authSvc.GetPlayer(httpCtx, _dbCtx);
-            return ValidPlayer(foundPlayer);
+            var authPlayerId = _authSvc.GetPlayerId(httpCtx);
+            var ctxPlayer = ValidPlayer(await _dbCtx.FindPlayerAsync(authPlayerId));
+            return ctxPlayer;
         }
 
 

@@ -10,6 +10,12 @@ namespace Rpg
         {
         }
 
+        public async Task<Account?> FindAccountAsync(int inAccountId)
+        {
+            return await AccountSet.FindAsync(inAccountId);
+        }
+
+
         public async Task<Account?> TouchAccountAsync(string inKey, string inSecret, Func<Player> createPlayer)
         {
             var oldAccount = await AccountSet.FindAsync(inKey);
@@ -29,9 +35,9 @@ namespace Rpg
             return newAccount;
         }
 
-        public async Task<Player?> FindPlayerAsync(int id)
+        public async Task<Player?> FindPlayerAsync(int inPlayerId)
         {
-            return await PlayerSet.FindAsync(id);
+            return await PlayerSet.FindAsync(inPlayerId);
         }
  
         public async Task<Point> TouchPointAsync(Player inPlayer, int inNum)

@@ -3,16 +3,15 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Rpg.Models;
+using Rpg.Configs;
 
 namespace Rpg.Services
 {
     public class AuthTokenService
     {
-        public AuthTokenService(string issuer, string audience, string keyStr)
+        public AuthTokenService(JwtAuthConfig cfg)
         {
-            _issuer = issuer;
-            _audience = audience;
-            _keyStr = keyStr;
+            _cfg = cfg;
         }
 
         public string CreatePlayerToken(int inPlayerId)
@@ -39,29 +38,27 @@ namespace Rpg.Services
         {
             var token = new JwtSecurityToken
             (
-                issuer: _issuer,
-                audience: _audience,
+                issuer: _cfg.Issuer,
+                audience: _cfg.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddDays(1),
                 notBefore: DateTime.UtcNow,
                 signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_keyStr)),
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_cfg.Key)),
                     SecurityAlgorithms.HmacSha256)
             );
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<Player?> GetPlayer(HttpContext httpCtx, UserDbContext dbCtx)
+        public int GetPlayerId(HttpContext httpCtx)
         {
-            var playerIdStr = httpCtx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (playerIdStr == null) return null;
-            var playerId = int.Parse(playerIdStr);
-            return await dbCtx.PlayerSet.FindAsync(playerId);
+            var idStr = httpCtx.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (idStr == null) return 0;
+            var id = int.Parse(idStr);
+            return id;
         }
-        
-        private readonly string _issuer;
-        private readonly string _audience;
-        private readonly string _keyStr;
+
+        private readonly JwtAuthConfig _cfg;
     }
 }
