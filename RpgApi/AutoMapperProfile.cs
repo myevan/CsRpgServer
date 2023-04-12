@@ -4,9 +4,9 @@ using Rpg.Models;
 
 namespace Rpg
 {
-    public class AutoMapperConfig : Profile
+    public class AutoMapperProfile : Profile
     {
-        public AutoMapperConfig()
+        public AutoMapperProfile()
         {
             CreateMap<Player, PlayerResponse>().ReverseMap();
             CreateMap<Point, PointResponse>().ReverseMap();

@@ -63,7 +63,7 @@ builder.Services.AddSingleton<AuthService>(provider =>
 
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
-builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 var app = builder.Build();
 app.Logger.LogDebug("app_started");
