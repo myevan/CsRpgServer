@@ -2,8 +2,10 @@
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Rpg.Grpc;
+using Rpg.Helpers;
 using Rpg.Models;
 using System;
+using System.Xml.Linq;
 
 namespace Rpg.Services
 {
@@ -19,18 +21,19 @@ namespace Rpg.Services
         [AllowAnonymous]
         public async override Task<WorldResponse> EnterWorld(WorldRequest req, ServerCallContext ctx)
         {
-            VerifyGuid(req.Guid, "RPC_ERR_REQ_PLAYER_GUID");
+            ValidGuid(req.Guid);
 
-            var reqPlayer = VerifyModel(await _dbCtx.TouchPlayerAsync(req.Guid), "RPC_ERR_REQ_PLAYER");
+            var ctxCount = ValidAccount(await _dbCtx.TouchAccountAsync(req.Guid, "SECRET", () => new Player()));
+            var ctxPlayer = ctxCount.Player;
+            var newToken = _authSvc.CreatePlayerToken(ctxPlayer.Id);
             
-            var newToken = _authSvc.CreatePlayerToken(reqPlayer.Id);
             var res = new WorldResponse()
             {
                 Token = newToken,
-                Player = _mapper.Map<PlayerResponse>(reqPlayer),
+                Player = _mapper.Map<PlayerResponse>(ctxPlayer),
             };
 
-            foreach (var eachPoint in await _dbCtx.GetPointListAsync(reqPlayer))
+            foreach (var eachPoint in await _dbCtx.GetPointListAsync(ctxPlayer))
             {
                 res.Points.Add(_mapper.Map<PointResponse>(eachPoint));
             }
@@ -40,58 +43,30 @@ namespace Rpg.Services
 
         public async override Task<PlayerResponse> ChangePlayerName(NameRequest req, ServerCallContext ctx)
         {
-            VerifyString(req.Name, "RPC_ERR_REQ_NAME");
-            VerifyStringLength(req.Name, "RPC_ERR_REQ_NAME_TOO_LONG", maxLen: 8);
+            ValidName(req.Name, maxLen: 8);
 
-            var ctxPlayer = VerifyModel(await GetContextPlayer(ctx), "RPC_ERR_CTX_PLAYER");
+            var ctxPlayer = await ValidGetPlayerAsync(ctx);
             ctxPlayer.Name = req.Name;
-
             _dbCtx.SaveChanges();
 
             var res = _mapper.Map<PlayerResponse>(ctxPlayer);
             return await Task.FromResult(res);
         }
 
-        private async Task<Player?> GetContextPlayer(ServerCallContext ctx)
+        private async Task<Player> ValidGetPlayerAsync(ServerCallContext ctx)
         {
             var httpCtx = ctx.GetHttpContext();
-            return await _authSvc.GetPlayer(httpCtx, _dbCtx);
+            var foundPlayer = await _authSvc.GetPlayer(httpCtx, _dbCtx);
+            return ValidPlayer(foundPlayer);
         }
 
-        private static string VerifyGuid(string val, string detail)
-        {
-            if (string.IsNullOrEmpty(val))
-            {
-                throw new RpcException(new Status(StatusCode.InvalidArgument, detail));
-            }
-            return val;
-        }
-        private static string VerifyString(string val, string detail)
-        {
-            if (string.IsNullOrEmpty(val))
-            {
-                throw new RpcException(new Status(StatusCode.InvalidArgument, detail));
-            }
-            return val;
-        }
 
-        private static string VerifyStringLength(string val, string detail, int maxLen)
-        {
-            if (maxLen > 0 && val.Length > maxLen)
-            {
-                throw new RpcException(new Status(StatusCode.InvalidArgument, detail));
-            }
-            return val;
-        }
+        private static string ValidGuid(string val) => ValidHelper.String("GUID", val);
+        private static string ValidName(string val, int maxLen) => ValidHelper.StringLength("NAME", val, maxLen: maxLen);
 
-        private static T VerifyModel<T>(T? val, string detail)
-        {
-            if (val == null)
-            {
-                throw new RpcException(new Status(StatusCode.NotFound, detail));
-            }
-            return val;
-        }
+        private static Account ValidAccount(Account? obj) => ValidHelper.Object<Account>("ACCOUNT", obj);
+
+        private static Player ValidPlayer(Player? obj) => ValidHelper.Object<Player>("PLAYER", obj);
 
         private UserDbContext _dbCtx;
         private AuthService _authSvc;

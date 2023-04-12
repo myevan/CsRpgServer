@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using Rpg.Models;
 
 namespace Rpg
@@ -9,41 +10,30 @@ namespace Rpg
         {
         }
 
+        public async Task<Account?> TouchAccountAsync(string inKey, string inSecret, Func<Player> createPlayer)
+        {
+            var oldAccount = await AccountSet.FindAsync(inKey);
+            if (oldAccount != null)
+            {
+                if (oldAccount.Secret != inSecret)
+                {
+                    return null;
+                }
+            }
+
+            var newPlayer = createPlayer();
+            var newAccount = new Account() { Key = inKey, Secret = inSecret, Player = newPlayer };
+            Add(newPlayer);
+            Add(newAccount);
+            await SaveChangesAsync();
+            return newAccount;
+        }
 
         public async Task<Player?> FindPlayerAsync(int id)
         {
             return await PlayerSet.FindAsync(id);
         }
-
-        public async Task<Player> TouchPlayerAsync(string inGuid)
-        {
-            var oldPlayer = PlayerSet.Where(each => each.Guid == inGuid).FirstOrDefault();
-            if (oldPlayer != null)
-            {
-                return oldPlayer;
-            }
-
-            var newPlayer = new Player()
-            {
-                Guid = inGuid
-            };
-            Add(newPlayer);
-
-            // TODO: 필수 포인트 생성
-            for (int iNum = 1; iNum < 3; ++iNum)
-            {
-                var newPoint = new Point()
-                {
-                    Player = newPlayer,
-                    Num = iNum,
-                };
-                Add(newPoint);
-            }
-
-            await SaveChangesAsync();
-            return newPlayer;
-        }
-
+ 
         public async Task<Point> TouchPointAsync(Player inPlayer, int inNum)
         {
             var oldPoint = PointSet.Where(each => each.Player.Id == inPlayer.Id && each.Num == inNum).FirstOrDefault();
@@ -64,9 +54,10 @@ namespace Rpg
 
         public async Task<List<Point>> GetPointListAsync(Player inPlayer)
         {
-            return PointSet.Where(each => each.Player.Id == inPlayer.Id).ToList();
+            return await PointSet.Where(each => each.Player.Id == inPlayer.Id).ToListAsync();
         }
 
+        public DbSet<Account> AccountSet { get; set; }
         public DbSet<Player> PlayerSet { get; set; }
         public DbSet<Point> PointSet { get; set; }
     }
