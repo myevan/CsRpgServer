@@ -7,63 +7,21 @@ using Microsoft.OpenApi.Models;
 using Rpg;
 using Rpg.Configs;
 using Rpg.Services;
-using System.Text;
-using System.Diagnostics;
 using Rpg.Helpers;
+using AutoMapper;
+using Rpg.Examples;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
 
-var jwtCfg = ConfigHelper.Create<JwtAuthConfig>(builder.Configuration, "Jwt:");
 builder.Services.AddDbContext<UserDbContext>(opts => opts.UseInMemoryDatabase("UserDb"));
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(opts =>
-{
-    opts.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Description = "Bearer Authentication with JWT Token",
-        Type = SecuritySchemeType.Http
-    });
-
-    opts.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Id = "Bearer", Type = ReferenceType.SecurityScheme }
-            },
-            new List<string>()
-        }
-    });
-});
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
-{
-    opts.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateActor = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidIssuer = jwtCfg.Issuer,
-        ValidAudience = jwtCfg.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtCfg.Key))
-    };
-});
-
-builder.Services.AddAuthorization();
-builder.Services.AddSingleton<JwtAuthService>(provider =>
-{
-    return new JwtAuthService(jwtCfg);
-});
 
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddScoped<GameService>();
+
+JwtAuthHelper.InitializeBuilder(builder);
 
 var app = builder.Build();
 app.Logger.LogDebug("app_started");
@@ -78,7 +36,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.UseAuthentication();
-app.MapGrpcService<GrpcGameService>();
+app.MapGrpcService<GameGrpcService>();
 
 app.MapGet("/", 
     () => 
@@ -88,9 +46,16 @@ app.MapPost("/auth",
     (string guid, JwtAuthService authSvc) => 
         Results.Text(authSvc.CreateRoleToken("OPERATOR")));
 
+app.MapGet("/world/player",
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "OPERATOR")]
+    (UserDbContext dbCtx) =>
+        Results.Ok(dbCtx.PlayerSet.ToList()));
+
 app.MapGet("/world/player/{id}",
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "OPERATOR")]
     (int id, UserDbContext dbCtx) =>
         Results.Ok(dbCtx.PlayerSet.Find(id)));
+
+GameServiceExample.Run();
 
 app.Run();

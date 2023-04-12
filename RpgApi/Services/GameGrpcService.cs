@@ -9,11 +9,11 @@ using System.Xml.Linq;
 
 namespace Rpg.Services
 {
-    public class GrpcGameService : Game.GameBase
+    public class GameGrpcService : Game.GameBase
     {
-        public GrpcGameService(UserDbContext dbCtx, JwtAuthService authSvc, IMapper mapper)
+        public GameGrpcService(GameService gameSvc, JwtAuthService authSvc, IMapper mapper)
         {
-            _dbCtx = dbCtx;
+            _gameSvc = gameSvc;
             _authSvc = authSvc;
             _mapper = mapper;
         }
@@ -21,10 +21,7 @@ namespace Rpg.Services
         [AllowAnonymous]
         public async override Task<WorldResponse> EnterWorld(WorldRequest req, ServerCallContext ctx)
         {
-            ValidGuid(req.Guid);
-
-            var ctxCount = ValidAccount(await _dbCtx.TouchAccountAsync(req.Guid, "SECRET", () => new Player()));
-            var ctxPlayer = ctxCount.Player;
+            var ctxPlayer = _gameSvc.EnterWorld(req.Guid);
             var newToken = _authSvc.CreatePlayerToken(ctxPlayer.Id);
             
             var res = new WorldResponse()
@@ -33,43 +30,33 @@ namespace Rpg.Services
                 Player = _mapper.Map<PlayerResponse>(ctxPlayer),
             };
 
-            foreach (var eachPoint in await _dbCtx.GetPointListAsync(ctxPlayer))
+            /* TODO
+            foreach (var eachPoint in await ctxPlayer.Points)
             {
                 res.Points.Add(_mapper.Map<PointResponse>(eachPoint));
             }
+            */
             
             return await Task.FromResult(res);
         }
 
         public async override Task<PlayerResponse> ChangePlayerName(NameRequest req, ServerCallContext ctx)
         {
-            ValidName(req.Name, maxLen: 8);
-
-            var ctxPlayer = await ValidGetPlayerAsync(ctx);
-            ctxPlayer.Name = req.Name;
-            _dbCtx.SaveChanges();
-
+            var authPlayerId = GetAuthPlayerId(ctx);
+            var ctxPlayer = _gameSvc.ChangePlayerName(authPlayerId, req.Name);
+            
             var res = _mapper.Map<PlayerResponse>(ctxPlayer);
             return await Task.FromResult(res);
         }
 
-        private async Task<Player> ValidGetPlayerAsync(ServerCallContext ctx)
+        private int GetAuthPlayerId(ServerCallContext ctx)
         {
             var httpCtx = ctx.GetHttpContext();
             var authPlayerId = _authSvc.GetPlayerId(httpCtx);
-            var ctxPlayer = ValidPlayer(await _dbCtx.FindPlayerAsync(authPlayerId));
-            return ctxPlayer;
+            return authPlayerId;
         }
 
-
-        private static string ValidGuid(string val) => ValidHelper.String("GUID", val);
-        private static string ValidName(string val, int maxLen) => ValidHelper.StringLength("NAME", val, maxLen: maxLen);
-
-        private static Account ValidAccount(Account? obj) => ValidHelper.Object<Account>("ACCOUNT", obj);
-
-        private static Player ValidPlayer(Player? obj) => ValidHelper.Object<Player>("PLAYER", obj);
-
-        private UserDbContext _dbCtx;
+        private GameService _gameSvc;
         private JwtAuthService _authSvc;
         private IMapper _mapper;
     }
