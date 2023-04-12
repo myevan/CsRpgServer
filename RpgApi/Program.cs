@@ -5,20 +5,16 @@ using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rpg;
+using Rpg.Configs;
 using Rpg.Services;
 using System.Text;
 using System.Diagnostics;
+using Rpg.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
 
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
-var jwtKeyStr = builder.Configuration["Jwt:Key"];
-Debug.Assert(!string.IsNullOrEmpty(jwtIssuer));
-Debug.Assert(!string.IsNullOrEmpty(jwtAudience));
-Debug.Assert(!string.IsNullOrEmpty(jwtKeyStr));
-
+var jwtCfg = ConfigHelper.Create<JwtConfig>(builder.Configuration, "Jwt:");
 builder.Services.AddDbContext<UserDbContext>(opts => opts.UseInMemoryDatabase("UserDb"));
 
 builder.Services.AddEndpointsApiExplorer();
@@ -53,16 +49,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateActor = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKeyStr))
+        ValidIssuer = jwtCfg.Issuer,
+        ValidAudience = jwtCfg.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtCfg.Key))
     };
 });
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<AuthService>(provider =>
 {
-    return new AuthService(jwtIssuer, jwtAudience, jwtKeyStr);
+    return new AuthService(jwtCfg.Issuer, jwtCfg.Audience, jwtCfg.Key);
 });
 
 builder.Services.AddGrpc();
