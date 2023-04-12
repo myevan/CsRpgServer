@@ -9,9 +9,9 @@ using System.Xml.Linq;
 
 namespace Rpg.Services
 {
-    public class GameRpcService : Game.GameBase
+    public class GrpcGameService : Game.GameBase
     {
-        public GameRpcService(UserDbContext dbCtx, AuthTokenService authSvc, IMapper mapper)
+        public GrpcGameService(UserDbContext dbCtx, JwtAuthService authSvc, IMapper mapper)
         {
             _dbCtx = dbCtx;
             _authSvc = authSvc;
@@ -70,7 +70,7 @@ namespace Rpg.Services
         private static Player ValidPlayer(Player? obj) => ValidHelper.Object<Player>("PLAYER", obj);
 
         private UserDbContext _dbCtx;
-        private AuthTokenService _authSvc;
+        private JwtAuthService _authSvc;
         private IMapper _mapper;
     }
 }

@@ -7,9 +7,9 @@ using Rpg.Configs;
 
 namespace Rpg.Services
 {
-    public class AuthTokenService
+    public class JwtAuthService
     {
-        public AuthTokenService(JwtAuthConfig cfg)
+        public JwtAuthService(JwtAuthConfig cfg)
         {
             _cfg = cfg;
         }

@@ -56,9 +56,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddSingleton<AuthTokenService>(provider =>
+builder.Services.AddSingleton<JwtAuthService>(provider =>
 {
-    return new AuthTokenService(jwtCfg);
+    return new JwtAuthService(jwtCfg);
 });
 
 builder.Services.AddGrpc();
@@ -78,14 +78,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.UseAuthentication();
-app.MapGrpcService<GameRpcService>();
+app.MapGrpcService<GrpcGameService>();
 
 app.MapGet("/", 
     () => 
         "Welcome to Rpg!");
 
 app.MapPost("/auth", 
-    (string guid, AuthTokenService authSvc) => 
+    (string guid, JwtAuthService authSvc) => 
         Results.Text(authSvc.CreateRoleToken("OPERATOR")));
 
 app.MapGet("/world/player/{id}",
