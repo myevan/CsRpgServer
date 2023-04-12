@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,6 @@ using Rpg;
 using Rpg.Services;
 using System.Text;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
