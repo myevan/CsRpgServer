@@ -1,10 +1,9 @@
-﻿using Grpc.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Rpg.Models;
 
 namespace Rpg.DbContexts
 {
-    public class UserDbContext : Microsoft.EntityFrameworkCore.DbContext
+    public class UserDbContext :DbContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> opts) : base(opts)
         {
