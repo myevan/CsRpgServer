@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Rpg.Models;
 
-namespace Rpg
+namespace Rpg.DbContexts
 {
-    public class UserDbContext : DbContext
+    public class UserDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> opts) : base(opts)
         {
@@ -39,7 +39,7 @@ namespace Rpg
         {
             return await PlayerSet.FindAsync(inPlayerId);
         }
- 
+
         public async Task<Point> TouchPointAsync(Player inPlayer, int inNum)
         {
             var oldPoint = PointSet.Where(each => each.Player.Id == inPlayer.Id && each.Num == inNum).FirstOrDefault();

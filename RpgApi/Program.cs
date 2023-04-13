@@ -6,6 +6,7 @@ using Rpg;
 using Rpg.Services;
 using Rpg.Helpers;
 using Rpg.Examples;
+using Rpg.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddYamlFile("AppSettings.yaml");
