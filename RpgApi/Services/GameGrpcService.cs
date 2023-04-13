@@ -2,10 +2,6 @@
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Rpg.Grpc;
-using Rpg.Helpers;
-using Rpg.Models;
-using System;
-using System.Xml.Linq;
 
 namespace Rpg.Services
 {
