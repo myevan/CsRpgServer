@@ -15,18 +15,16 @@ namespace Rpg.Services
             _distCache = distCache;
         }
 
-        public async Task<Player> ConnectPlayerAsync(HttpContext httpCtx)
-        {
-            var ses = ValidSession(httpCtx);
+        public async Task<Player> ConnectPlayerAsync(Session ses)
+        {            
             var sesUserGuid = ses.GetUserGuid();
             var ctxPlayer = ValidPlayer(await _dbCtx.TouchPlayerAsync(sesUserGuid));
             ses.SetPlayerId(ctxPlayer.Id);
             return ctxPlayer;
         }
         
-        public async Task<Player> ChangePlayerNameAsync(HttpContext httpCtx, string inName)
+        public async Task<Player> ChangePlayerNameAsync(Session ses, string inName)
         {
-            var ses = ValidSession(httpCtx);
             var sesPlayerId = ses.GetPlayerId();
             var ctxPlayer = ValidPlayer(await _dbCtx.FindPlayerAsync(sesPlayerId));
             ctxPlayer.Name = inName;
@@ -34,12 +32,7 @@ namespace Rpg.Services
 
             return ctxPlayer;
         }
-        private Session ValidSession(HttpContext httpCtx)
-        {
-            var sesKey = ValidHelper.String("CLAIM_SESSION_KEY", _jwtSvc.LoadClaimSessionKey(httpCtx));
-            return Session.Load(_distCache, sesKey);
-        }
-
+        
         private static Player ValidPlayer(Player? obj) => ValidHelper.Object("PLAYER", obj);
 
         private readonly WorldDbContext _dbCtx;

@@ -6,7 +6,6 @@ using Rpg.Helpers;
 using Rpg.Services;
 using Rpg.Examples;
 using Rpg.DbContexts;
-using Microsoft.Extensions.Caching.Distributed;
 using Rpg.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +18,9 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddDbContext<AuthDbContext>(opts => opts.UseInMemoryDatabase("AuthDb"));
 builder.Services.AddDbContext<WorldDbContext>(opts => opts.UseInMemoryDatabase("WorldDb"));
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AuthRestService>();
 builder.Services.AddScoped<WorldService>();
+builder.Services.AddScoped<WorldRestService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
@@ -44,34 +45,28 @@ app.MapGet("/",
     () => 
         "Welcome to Rpg!");
 
-app.MapPost("/auth", 
-    async (string name, AuthService authSvc, JwtService jwtSvc) => 
-        Results.Text(jwtSvc.DumpSession(await authSvc.SignUpAsync(name))));
+app.MapPost("/auth",
+    async (string name, AuthRestService svc) => await svc.PostAuthAsync(name));
 
 app.MapGet("/auth",
-    (HttpContext httpCtx, JwtService jwtSvc) =>
-    {
-        var ses = jwtSvc.LoadSession(httpCtx);
-        if (ses == null) return Results.NotFound();
-        return Results.Ok(ses.ToDict());
-    });
+    (HttpContext ctx, AuthRestService svc) => svc.GetAuth(ctx));
 
 app.MapPost("/world/player",
-    async (HttpContext httpCtx, WorldService worldSvc) =>
-        Results.Ok(await worldSvc.ConnectPlayerAsync(httpCtx)));
+    async (HttpContext ctx, WorldRestService svc) => await svc.PostWorldPlayerAsync(ctx));
 
 app.MapGet("/world/player",
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "OPERATOR")]
-    (WorldDbContext dbCtx) =>
-        Results.Ok(dbCtx.PlayerSet.ToList()));
+    async (HttpContext ctx, WorldRestService svc) => await svc.GetWorldPlayerAsync(ctx));
 
 app.MapGet("/world/player/{id}",
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "OPERATOR")]
-    (int id, WorldDbContext dbCtx) =>
-        Results.Ok(dbCtx.PlayerSet.Find(id)));
+    async (int id, WorldRestService svc) => await svc.GetWorldPlayerAsync(id));
+
+app.MapGet("/world/players",
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "OPERATOR")]
+    async (WorldRestService svc) => await svc.GetWorldPlayersAsync());
+
 
 //GameServiceExample.Run();
-
-AesExample.Run();
+//AesExample.Run();
 
 app.Run();

@@ -18,8 +18,8 @@ namespace Rpg.Services
 
         public async override Task<ConnectPlayerResponse> ConnectPlayer(ConnectPlayerRequest req, ServerCallContext ctx)
         {
-            var httpCtx = ctx.GetHttpContext();
-            var ctxPlayer = _worldSvc.ConnectPlayerAsync(httpCtx);
+            var ses = ValidSession(ctx);
+            var ctxPlayer = _worldSvc.ConnectPlayerAsync(ses);
             
             return await Task.FromResult(new ConnectPlayerResponse()
             {
@@ -30,14 +30,21 @@ namespace Rpg.Services
 
         public async override Task<ChangePlayerNameResponse> ChangePlayerName(ChangePlayerNameRequest req, ServerCallContext ctx)
         {
+            var ses = ValidSession(ctx);
             var valName = ValidName(req.Name, maxLen: 8);
-            var httpCtx = ctx.GetHttpContext();
-            var ctxPlayer = _worldSvc.ChangePlayerNameAsync(httpCtx, valName);
+            var ctxPlayer = _worldSvc.ChangePlayerNameAsync(ses, valName);
 
             return await Task.FromResult(new ChangePlayerNameResponse()
             {
                 Player = _mapper.Map<PlayerPacket>(ctxPlayer)
             });
+        }
+
+        private Session ValidSession(ServerCallContext ctx)
+        {
+            var httpCtx = ctx.GetHttpContext();
+            var sesKey = ValidHelper.String("CLAIM_SESSION_KEY", _jwtSvc.LoadClaimSessionKey(httpCtx));
+            return Session.Load(_distCache, sesKey);
         }
 
         private static string ValidName(string val, int maxLen) => ValidHelper.StringLength("NAME", val, maxLen: maxLen);
