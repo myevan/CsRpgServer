@@ -7,6 +7,7 @@ package rpg;
 service WorldProtocol {
 	rpc ConnectPlayer(ConnectPlayerRequest) returns (ConnectPlayerResponse);
 	rpc ChangePlayerName(ChangePlayerNameRequest) returns (ChangePlayerNameResponse);
+	rpc EnhancePlayerStat(EnhancePlayerStatRequest) returns (EnhancePlayerStatResponse);
 }
 
 message PlayerPacket {
@@ -15,10 +16,14 @@ message PlayerPacket {
 	int64 FreeCash = 3;	
 }
 
+message StatPacket {
+	int32 Num = 1;
+	int64 Lv = 2;
+}
+
 message PointPacket {
-	int32 Id = 1;
-	int32 Num = 2;
-	int64 Amount = 3;
+	int32 Num = 1;
+	int64 Amount = 2;
 }
 
 message ConnectPlayerRequest {
@@ -35,4 +40,15 @@ message ChangePlayerNameRequest {
 
 message ChangePlayerNameResponse {
 	PlayerPacket Player = 1;
+}
+
+message EnhancePlayerStatRequest {
+	int32 Num = 1;
+	int32 OldLv = 2;
+	int32 NewLv = 3;
+}
+
+message EnhancePlayerStatResponse {
+	PlayerPacket Player = 1;
+	StatPacket Stat = 2;
 }

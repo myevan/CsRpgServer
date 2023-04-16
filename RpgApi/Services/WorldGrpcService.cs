@@ -32,11 +32,23 @@ namespace Rpg.Services
         {
             var ses = ValidSession(ctx);
             var valName = ValidName(req.Name, maxLen: 8);
-            var ctxPlayer = _worldSvc.ChangePlayerNameAsync(ses, valName);
+            var ctxPlayer = await _worldSvc.ChangePlayerNameAsync(ses, valName);
 
             return await Task.FromResult(new ChangePlayerNameResponse()
             {
                 Player = _mapper.Map<PlayerPacket>(ctxPlayer)
+            });
+        }
+
+        public async override Task<EnhancePlayerStatResponse> EnhancePlayerStat(EnhancePlayerStatRequest req, ServerCallContext ctx)
+        {
+            var ses = ValidSession(ctx);
+            var (ctxPlayer, ctxStat) = await _worldSvc.EnhancePlayerStatAsync(ses, req.Num, req.OldLv, req.NewLv);
+
+            return await Task.FromResult(new EnhancePlayerStatResponse()
+            {
+                Player = _mapper.Map<PlayerPacket>(ctxPlayer),
+                Stat = _mapper.Map<StatPacket>(ctxStat)
             });
         }
 

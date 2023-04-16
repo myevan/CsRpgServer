@@ -39,7 +39,7 @@ namespace Rpg.Services
             return ctxPlayer;
         }
 
-        public async Task<Stat> IncPlayerStatAsync(Session ses, int inNum, int inOldLv, int inNewLv)
+        public async Task<(Player, Stat)> EnhancePlayerStatAsync(Session ses, int inNum, int inOldLv, int inNewLv)
         {
             int prtGoldCost = 100;
             var ctxPlayer = await LoadPlayerAsync(ses);
@@ -51,7 +51,7 @@ namespace Rpg.Services
             ctxStat.Lv = inNewLv;
 
             await _dbCtx.SaveChangesAsync();
-            return ctxStat;
+            return (ctxPlayer, ctxStat);
         }
 
         private static Player ValidPlayer(Player? obj) => ValidHelper.Object("PLAYER", obj);
