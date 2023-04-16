@@ -22,17 +22,38 @@ namespace Rpg.Services
             ses.SetPlayerId(ctxPlayer.Id);
             return ctxPlayer;
         }
-        
-        public async Task<Player> ChangePlayerNameAsync(Session ses, string inName)
+
+        public async Task<Player> LoadPlayerAsync(Session ses)
         {
             var sesPlayerId = ses.GetPlayerId();
             var ctxPlayer = ValidPlayer(await _dbCtx.FindPlayerAsync(sesPlayerId));
+            return ctxPlayer;
+        }
+
+        public async Task<Player> ChangePlayerNameAsync(Session ses, string inName)
+        {
+            var ctxPlayer = await LoadPlayerAsync(ses);
             ctxPlayer.Name = inName;
             _dbCtx.SaveChanges();
 
             return ctxPlayer;
         }
-        
+
+        public async Task<Stat> IncPlayerStatAsync(Session ses, int inNum, int inOldLv, int inNewLv)
+        {
+            int prtGoldCost = 100;
+            var ctxPlayer = await LoadPlayerAsync(ses);
+            ValidHelper.PlayeGoldCost(ctxPlayer, prtGoldCost);
+            ctxPlayer.Gold -= prtGoldCost;
+
+            var ctxStat = await _dbCtx.TouchStatAsync(ctxPlayer.Id, inNum);
+            ValidHelper.StatLevel(ctxStat, inOldLv);
+            ctxStat.Lv = inNewLv;
+
+            await _dbCtx.SaveChangesAsync();
+            return ctxStat;
+        }
+
         private static Player ValidPlayer(Player? obj) => ValidHelper.Object("PLAYER", obj);
 
         private readonly WorldDbContext _dbCtx;

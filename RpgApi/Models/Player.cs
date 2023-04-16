@@ -16,6 +16,7 @@ namespace Rpg.Models
 
         public string Name { get; set; } = "";
 
+        public int Gold { get; set; } = 0;
         public int RealCash { get; set; } = 0;
         public int FreeCash { get; set; } = 0;
 

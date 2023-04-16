@@ -28,6 +28,25 @@ namespace Rpg.DbContexts
             return await PlayerSet.FindAsync(inPlayerId);
         }
 
+        public async Task<Stat> TouchStatAsync(int inPlayerId, int inNum)
+        {
+            var oldStat = StatSet.Where(each => each.PlayerId == inPlayerId && each.Num == inNum).FirstOrDefault();
+            if (oldStat != null)
+            {
+                return oldStat;
+            }
+
+            var newStat = new Stat()
+            {
+                PlayerId = inPlayerId,
+                Num = inNum,
+            };
+            Add(newStat);
+            await SaveChangesAsync();
+            return newStat;
+        }
+
+
         public async Task<Point> TouchPointAsync(Player inPlayer, int inNum)
         {
             var oldPoint = PointSet.Where(each => each.Player.Id == inPlayer.Id && each.Num == inNum).FirstOrDefault();
@@ -52,6 +71,7 @@ namespace Rpg.DbContexts
         }
 
         public DbSet<Player> PlayerSet { get; set; }
+        public DbSet<Stat> StatSet { get; set; }
         public DbSet<Point> PointSet { get; set; }
     }
 }

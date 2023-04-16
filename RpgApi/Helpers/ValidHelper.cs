@@ -1,5 +1,7 @@
 ﻿using Grpc.Core;
 using Microsoft.AspNetCore.Http;
+using Rpg.Models;
+using System.Xml.Linq;
 
 namespace Rpg.Helpers
 {
@@ -45,6 +47,17 @@ namespace Rpg.Helpers
             var valStr = String(name, inStr);
             Condition(valStr.Length <= maxLen, StatusCode.InvalidArgument, $"TOO_LONG_{name}");
             return valStr;
+        }
+
+        public static void PlayeGoldCost(Player player, int inGoldCost)
+        {
+            Condition(inGoldCost > 0, StatusCode.InvalidArgument, "MINUS_GOLD_COST");
+            Condition(player.Gold >= inGoldCost, StatusCode.OutOfRange, "OVER_GOLD_COST");
+        }
+
+        public static void StatLevel(Stat stat, int inOldLv)
+        {
+            Condition(stat.Lv == inOldLv, StatusCode.InvalidArgument, "STAT_LV_MISMATCHED");
         }
     }
 }
