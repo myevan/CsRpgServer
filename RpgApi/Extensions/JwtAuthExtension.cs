@@ -2,19 +2,18 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rpg.Configs;
+using Rpg.Helpers;
 using Rpg.Services;
 using System.Text;
 
-namespace Rpg.Helpers
+namespace Rpg.Extensions
 {
-    public static class JwtAuthHelper
+    public static class JwtAuthExtension
     {
-        public static void InitializeBuilder(WebApplicationBuilder builder)
+        public static void AddJwtService(this IServiceCollection serviceColleciton, JwtAuthConfig cfg)
         {
-            var cfg = ConfigHelper.Create<JwtAuthConfig>(builder.Configuration, "Jwt:");
-
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(opts =>
+            serviceColleciton.AddEndpointsApiExplorer();
+            serviceColleciton.AddSwaggerGen(opts =>
             {
                 opts.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -38,7 +37,7 @@ namespace Rpg.Helpers
                 });
             });
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
+            serviceColleciton.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
             {
                 opts.TokenValidationParameters = new TokenValidationParameters()
                 {
@@ -51,11 +50,9 @@ namespace Rpg.Helpers
                 };
             });
 
-            builder.Services.AddAuthorization();
-            builder.Services.AddSingleton<JwtAuthService>(provider =>
-            {
-                return new JwtAuthService(cfg);
-            });
+            serviceColleciton.AddAuthorization();
+            serviceColleciton.AddSingleton<JwtAuthConfig>(provider => cfg);
+            serviceColleciton.AddScoped<JwtService>();
 
         }
     }

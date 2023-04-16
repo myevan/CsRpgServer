@@ -3,37 +3,26 @@ using Rpg.Models;
 
 namespace Rpg.DbContexts
 {
-    public class UserDbContext :DbContext
+    public class WorldDbContext :DbContext
     {
-        public UserDbContext(DbContextOptions<UserDbContext> opts) : base(opts)
+        public WorldDbContext(DbContextOptions<WorldDbContext> opts) : base(opts)
         {
         }
-
-        public async Task<Account?> FindAccountAsync(int inAccountId)
+        
+        public async Task<Player?> TouchPlayerAsync(string inGuid)
         {
-            return await AccountSet.FindAsync(inAccountId);
-        }
-
-
-        public async Task<Account?> TouchAccountAsync(string inKey, string inSecret, Func<Player> createPlayer)
-        {
-            var oldAccount = await AccountSet.FindAsync(inKey);
-            if (oldAccount != null)
+            var oldPlayer = await PlayerSet.Where(each => each.Guid == inGuid).FirstOrDefaultAsync();
+            if (oldPlayer != null)
             {
-                if (oldAccount.Secret != inSecret)
-                {
-                    return null;
-                }
+                return oldPlayer;
             }
 
-            var newPlayer = createPlayer();
-            var newAccount = new Account() { Key = inKey, Secret = inSecret, Player = newPlayer };
+            var newPlayer = new Player() { Guid = inGuid };
             Add(newPlayer);
-            Add(newAccount);
             await SaveChangesAsync();
-            return newAccount;
+            return newPlayer;
         }
-
+        
         public async Task<Player?> FindPlayerAsync(int inPlayerId)
         {
             return await PlayerSet.FindAsync(inPlayerId);
@@ -62,7 +51,6 @@ namespace Rpg.DbContexts
             return await PointSet.Where(each => each.Player.Id == inPlayer.Id).ToListAsync();
         }
 
-        public DbSet<Account> AccountSet { get; set; }
         public DbSet<Player> PlayerSet { get; set; }
         public DbSet<Point> PointSet { get; set; }
     }

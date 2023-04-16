@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Rpg.Grpc;
 using Rpg.Models;
+using Rpg.Protocols;
 
 namespace Rpg
 {
@@ -8,8 +8,8 @@ namespace Rpg
     {
         public AutoMapperProfile()
         {
-            CreateMap<Player, PlayerResponse>().ReverseMap();
-            CreateMap<Point, PointResponse>().ReverseMap();
+            CreateMap<Player, PlayerPacket>().ReverseMap();
+            CreateMap<Point, PointPacket>().ReverseMap();
         }
     }
 }

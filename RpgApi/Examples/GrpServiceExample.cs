@@ -11,18 +11,21 @@ namespace Rpg.Examples
     {
         public static void Run()
         {
-            var dbOpts = new DbContextOptionsBuilder<UserDbContext>().UseInMemoryDatabase(databaseName: "UserDb").Options;
-            var dbCtx = new UserDbContext(dbOpts);
+            var dbOpts = new DbContextOptionsBuilder<WorldDbContext>().UseInMemoryDatabase(databaseName: "UserDb").Options;
+            var dbCtx = new WorldDbContext(dbOpts);
 
             var jwtCfg = new JwtAuthConfig();
+            /*
             var authSvc = new JwtAuthService(jwtCfg);
+            
             var gameSvc = new GameService(dbCtx);
 
             var mapperCfg = new MapperConfiguration(cfg => {
                 cfg.AddProfile<AutoMapperProfile>();
             });
             var mapper = new Mapper(mapperCfg);
-            var grpcSvc = new GameGrpcService(gameSvc, authSvc, mapper);
+            var grpcSvc = new GrpcWorldService(gameSvc, authSvc, mapper);
+            */
         }
     }
 }

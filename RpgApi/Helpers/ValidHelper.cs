@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Microsoft.AspNetCore.Http;
 
 namespace Rpg.Helpers
 {
@@ -12,28 +13,38 @@ namespace Rpg.Helpers
             }
         }
 
-        public static string String(string name, string val)
+        public static string String(string name, string? inStr)
         {
-            Condition(!string.IsNullOrEmpty(val), StatusCode.InvalidArgument, $"EMPTY_{name}");
-            return val;
+            if (inStr == null)
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, $"RPC_EXC_NULL_{name}"));
+            }
+            return inStr;
+        }
+        public static int Id(string name, int inId)
+        {
+            if (inId <= 0)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"RPC_EXC_WRONG_{name}"));
+            }
+            return inId;
         }
 
-        public static string StringLength(string name, string val, int maxLen)
+        public static T Object<T>(string name, T? inObj) where T : class
         {
-            String(name, val);
-            Condition(val.Length <= maxLen, StatusCode.InvalidArgument, $"TOO_LONG_{name}");
-            return val;
-        }
-
-        public static T Object<T>(string name, T? obj) where T : class
-        {
-            if (obj == null)
+            if (inObj == null)
             {
                 throw new RpcException(new Status(StatusCode.NotFound, $"RPC_EXC_NOT_FOUND_{name}"));
             }
 
-            return obj;
+            return inObj;
         }
 
+        public static string StringLength(string name, string? inStr, int maxLen)
+        {
+            var valStr = String(name, inStr);
+            Condition(valStr.Length <= maxLen, StatusCode.InvalidArgument, $"TOO_LONG_{name}");
+            return valStr;
+        }
     }
 }

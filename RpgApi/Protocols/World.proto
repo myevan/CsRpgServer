@@ -1,0 +1,38 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Rpg.Protocols";
+
+package rpg;
+
+service WorldProtocol {
+	rpc ConnectPlayer(ConnectPlayerRequest) returns (ConnectPlayerResponse);
+	rpc ChangePlayerName(ChangePlayerNameRequest) returns (ChangePlayerNameResponse);
+}
+
+message PlayerPacket {
+	string Name = 1;
+	int64 RealCash = 2;
+	int64 FreeCash = 3;	
+}
+
+message PointPacket {
+	int32 Id = 1;
+	int32 Num = 2;
+	int64 Amount = 3;
+}
+
+message ConnectPlayerRequest {
+}
+
+message ConnectPlayerResponse {
+	PlayerPacket Player = 2;
+	repeated PointPacket Points = 3;
+}
+
+message ChangePlayerNameRequest {
+	string Name = 1;
+}
+
+message ChangePlayerNameResponse {
+	PlayerPacket Player = 1;
+}

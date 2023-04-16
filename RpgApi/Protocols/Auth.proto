@@ -1,0 +1,31 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Rpg.Protocols";
+
+package rpg;
+
+service AuthProtocol {
+	rpc SignUp(SignUpRequest) returns (SignUpResponse);
+	rpc SignIn(SignInRequest) returns (SignInResponse);
+}
+
+message SignUpRequest
+{
+	string UserName = 1;
+}
+
+message SignUpResponse
+{
+	string Token = 1;
+}
+
+message SignInRequest
+{
+	string UserName = 1;
+	string Password = 2;
+}
+
+message SignInResponse
+{
+	string Token = 1;
+}
