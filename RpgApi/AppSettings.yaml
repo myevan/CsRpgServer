@@ -4,8 +4,8 @@
         Microsoft.AspNetCore: Warning
 AllowedHosts: "*"
 Jwt:
-    Issuer: DEV_ISSUER
-    Audience:  DEV_AUDIENCE
-    Key: TODO_KEY_0123456789012345678901234567890123456789
+    Issuer: CHANGE_ISSUER
+    Audience:  CHANGE_AUDIENCE
+    Key: CHANGE_KEY_0123456789012345678901234567890123456789
     AesKey: JnKmNZBsKlrTlhDypPmcIVLM8Sgcw5Z349xue21+GNw=
     AesIv: 64x6MU/o0UAVkQyfk54vlA==

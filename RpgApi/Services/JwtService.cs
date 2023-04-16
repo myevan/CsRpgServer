@@ -11,7 +11,7 @@ namespace Rpg.Services
 {
     public class JwtService
     {
-        const string CLAIM_SESSION = "SESSION";
+        const string CLAIM_SESSION = "ses";
 
         public JwtService(JwtAuthConfig cfg, IDistributedCache distCache)
         {
@@ -46,7 +46,7 @@ namespace Rpg.Services
                 issuer: _cfg.Issuer,
                 audience: _cfg.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.Add(_cfg.Duration),
                 notBefore: DateTime.UtcNow,
                 signingCredentials: new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_cfg.Key)),
